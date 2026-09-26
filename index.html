@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OTTER Training Dashboard</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><div class="logo">O</div><div><b>PERFORMANCE</b><small>Training Tracker</small></div></div>
+  <button class="nav active" data-page="dashboard">▦ <span>Dashboard</span></button>
+  <button class="nav" data-page="daily">▤ <span>Daily Report</span></button>
+  <button class="nav" data-page="candidates">♙ <span>Candidates</span></button>
+  <button class="nav" data-page="interviews">◷ <span>Interviews</span></button>
+  <button class="nav notification-nav" data-page="notifications">♢ <span>Notifications</span><b id="notificationBadge" class="notification-badge hidden">0</b></button>
+  <div class="side-tools">
+    <span id="sideConnection" class="status-pill status-checking">Connecting to Google Sheet…</span>
+    <button id="globalRefresh" class="side-refresh">↻ Refresh Data</button><small id="refreshReason" class="refresh-reason">Auto refresh every 10 minutes</small>
+  </div>
+  <div class="side-footer">Training & interview operations</div>
+</aside>
+
+<main>
+<header>
+  <div><small>PERFORMANCE & OTTER TRAINING</small><h1 id="title">Dashboard</h1></div>
+  <div class="actions"><label id="monthFilterLabel">Month<input id="month" type="month"></label><button id="feedbackBtn">+ Add Feedback</button></div>
+</header>
+
+<section id="dashboard" class="page">
+  <div class="hero"><div><p>Training overview</p><h2>Candidate Training & Interview Readiness</h2><span>Track training, attendance, feedback, placements and interview activity.</span></div><b>Monday – Friday<br><small id="heroMonth"></small></b></div>
+  <div class="cards">
+    <div><span>Candidates</span><strong id="candidatesCount">0</strong></div>
+    <div><span>Training Sessions</span><strong id="sessionsCount">0</strong></div>
+    <div><span>Attended</span><strong id="attendedCount">0</strong></div>
+    <div><span>No-Shows</span><strong id="noshowCount">0</strong></div>
+    <div><span>Interviews</span><strong id="interviewCount">0</strong></div>
+  </div>
+  <div class="panel candidate-progress-panel">
+  <div class="panel-title-row progress-head">
+    <div><h3>Candidate Progress</h3><p id="progressPeriodLabel">Weekly · selected week</p></div>
+    <div class="progress-controls">
+      <input id="progressSearch" class="progress-search" placeholder="Search candidate">
+      <input id="progressDate" class="progress-date" type="date">
+      <select id="progressPeriod" class="progress-period"><option value="weekly" selected>Weekly</option><option value="monthly">Monthly</option></select>
+      <button id="addCandidateBtn" class="small-btn">+ Add Candidate</button>
+    </div>
+  </div>
+  <p id="candidateProgressCount" class="result-hint">0 candidates</p><div class="tablewrap"><table><thead><tr><th>S.No</th><th>Candidate</th><th>Interviews</th><th>Attendance</th><th>Placement</th><th>Performance</th></tr></thead><tbody id="topCandidatePreview"></tbody></table></div>
+</div>
+  <div class="two">
+    <div class="panel"><h3>Weekly Training Activity</h3><p>Selected month</p><div id="bars" class="bars"></div></div>
+    <div class="panel"><h3>Attendance</h3><p>Attended vs No-Show</p><div class="donut" id="donut"><b id="pct">0%</b></div><div class="legend"><span class="attended-dot"></span> Attended <b id="da">0</b> &nbsp;&nbsp; <span class="noshow-dot"></span> No-Show <b id="dn">0</b></div></div>
+  </div>
+  <div class="two interview-home-panels"><div class="panel"><div class="panel-title-row"><div><h3>Recent Interviews</h3><p>Today’s interview activity</p></div><button class="small-btn" onclick="showPage('interviews')">View Interviews</button></div><div id="interviewPreview"></div></div><div class="panel"><div class="panel-title-row"><div><h3>Upcoming Interviews</h3><p>Future scheduled interviews</p></div><button class="small-btn" onclick="showPage('interviews')">View Interviews</button></div><div id="upcomingInterviewPreview"></div></div></div>
+</section>
+
+<section id="daily" class="page hidden">
+  <div class="sectionhead"><div><h2>Daily Report</h2><p>View one day or review the selected month.</p></div><div class="section-actions"><input id="dailyDate" type="date"><button id="copyDailyPrompt" class="small-btn">Copy Prompt</button><button id="pasteDailyBtn">Paste Daily Data</button><button id="export">Export CSV</button></div></div>
+  <div class="panel"><div class="note">Paste the table/text from ChatGPT. No CSV download is required.</div>
+  <div class="connection-row"><span id="connectionStatus" class="status-pill status-checking">Checking Google Sheet…</span><div><button id="copyDailyTable" class="copy-table-btn">Copy Table</button><button id="refreshTraining" class="small-btn">↻ Refresh</button></div></div>
+  <p id="dailyRowCount" class="result-hint">0 records</p><div class="tablewrap"><div class="table-top-actions"></div><table><thead><tr><th>S.No</th><th>Date</th><th>Name</th><th>Slot</th><th>Technology</th><th>Duration</th></tr></thead><tbody id="dailyTable"></tbody></table></div></div>
+
+  <div class="panel monthly-report-panel">
+    <div class="panel-title-row">
+      <div><h3>Monthly Training Summary</h3><p id="dailyMonthLabel">September 2026</p></div>
+      <input id="dailySearch" class="daily-search" placeholder="Search candidate">
+    </div>
+    <div class="monthly-stats">
+      <div><span>Candidates</span><strong id="dailyMonthCandidates">0</strong></div>
+      <div><span>Total Sessions</span><strong id="dailyMonthSessions">0</strong></div>
+      <div><span>Attended</span><strong id="dailyMonthAttended">0</strong></div>
+      <div><span>No-Shows</span><strong id="dailyMonthNoShows">0</strong></div>
+    </div>
+    <p id="dailySearchHint" class="result-hint">All candidates for selected month</p>
+    <p id="monthlyRowCount" class="result-hint">0 candidates</p><div class="tablewrap"><table><thead><tr><th>S.No</th><th>Candidate</th><th>Sessions</th><th>Attended</th><th>No-Shows</th><th>Technology</th></tr></thead><tbody id="dailyMonthlyTable"></tbody></table></div>
+  </div>
+</section>
+
+<section id="candidates" class="page hidden">
+  <div class="sectionhead"><div><h2>Candidates</h2><p>Search a profile, manage training details and update placement.</p></div><div class="section-actions"><input id="search" placeholder="Search candidate"><button id="addCandidateBtn2">+ Add Candidate</button></div></div>
+  <div id="candidateResultHint" class="result-hint"></div>
+  <div id="candidateGrid" class="candidategrid"></div>
+</section>
+
+<section id="interviews" class="page hidden">
+  <div class="sectionhead">
+    <div><h2>Interviews</h2><p>Copy the team's interview table into ChatGPT, then paste the converted table here.</p></div>
+    <div class="section-actions">
+      <button id="copyInterviewPrompt" class="small-btn">Copy Prompt</button>
+      <label class="upload small-upload">Import Excel / CSV<input id="interviewFile" type="file" accept=".xlsx,.xls,.csv"></label>
+      <button id="pasteInterviewBtn">Paste Interview Data</button>
+    </div>
+  </div>
+  <div class="panel interview-results-panel">
+    <h3>Overall Results</h3>
+    <div class="interview-result-cards">
+      <div><span>Total Interviews</span><strong id="interviewTotal">0</strong></div>
+      <div><span>Selected</span><strong id="interviewSelected" class="green-number">0</strong></div>
+      <div><span>Rescheduled</span><strong id="interviewRescheduled" class="orange-number">0</strong></div>
+      <div><span>Status Blank / Pending</span><strong id="interviewPending">0</strong></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="connection-row">
+      <span id="interviewStatus" class="status-pill status-checking">Google Sheet data</span>
+      <label class="mini-note">Month <input id="interviewMonth" type="month"></label>
+      <button id="refreshInterviews" class="small-btn">↻ Refresh</button>
+    </div>
+    <div class="interview-filters">
+      <input id="interviewSearch" placeholder="Search name, company, technology, status…">
+      <input id="interviewCompanyFilter" placeholder="Filter company">
+      <select id="interviewStatusFilter"><option value="">All statuses</option><option>Selected</option><option>Rejected</option><option>Rescheduled</option><option>Waiting for response</option><option>Pending</option></select>
+    </div>
+    <p id="interviewCountHint" class="result-hint">Showing 0 interviews</p>
+    <div class="tablewrap interview-tablewrap">
+      <table>
+        <thead><tr><th>S.No</th><th>Date</th><th>Coordinator</th><th>Candidate</th><th>Company</th><th>Technology / Role</th><th>Time</th><th>Round</th><th>Mode</th><th>Virtual</th><th>Support</th><th>Recruiter</th><th>Response</th><th>Status</th><th>Feedback</th></tr></thead>
+        <tbody id="interviewTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="notifications" class="page hidden">
+  <div class="sectionhead">
+    <div><h2>Notifications</h2><p>Candidate matching and data-flow alerts from Training and Interviews.</p></div>
+    <button class="small-btn" onclick="loadAll()">↻ Refresh Data</button>
+  </div>
+  <div id="notificationList" class="notification-list"></div>
+</section>
+</main>
+
+<div id="dailyImportModal" class="modal hidden"><div class="modalbox large-modal"><button id="dailyImportClose">×</button><h2>Paste Daily Training Data</h2><p class="modal-help">Copy the table/text from ChatGPT and paste it below. Accepted: table copy, tab-separated rows or pipe-separated rows.</p><div class="format-guide"><b>Format:</b> Date (dd-mm-yyyy) | Name | Slot | Technology | Duration – Status<br><span>Example: 24-09-2026 | Ajay | - | Control Engineer | 1 Hr – Attended</span><br><span>Slot and Technology can be <b>-</b>; the system will fill them automatically when possible.</span></div><textarea id="dailyPaste" class="pastebox" placeholder="24-09-2026 | Ajay | - | Control Engineer | 1 Hr – Attended
+24-09-2026 | Ajay | - | - | No-Show"></textarea><div id="pastePreview" class="paste-preview"></div><div class="modal-actions"><button id="previewDaily" class="secondary-btn">Preview</button><button id="importDaily" class="primary-btn">Import to Google Sheet</button></div></div></div>
+
+<div id="interviewImportModal" class="modal hidden"><div class="modalbox large-modal"><button id="interviewImportClose">×</button><h2>Paste Interview Data</h2><p class="modal-help">First use <b>Copy Prompt</b>, paste the raw screenshot/table into ChatGPT, copy the exact 14-column table ChatGPT returns, and paste it below.</p><div class="format-guide"><b>Format:</b> Date | Coordinator | Name | Company | Technology | Time | Round | Interview Mode | Virtual | Support | Recruiter | Response | Status | Feedback<br><span>Technology/Role can include <b>Marketing Executive</b>. Feedback is preserved separately.</span></div><textarea id="interviewPaste" class="pastebox" placeholder="| Date | Coordinator | Name | Company | Technology | Time | Round | Interview Mode | Virtual | Support | Recruiter | Response | Status | Feedback |"></textarea><div id="interviewPastePreview" class="paste-preview"></div><div class="modal-actions"><button id="previewInterviews" class="secondary-btn">Preview</button><button id="importInterviewsBtn" class="primary-btn">Import to Google Sheet</button></div></div></div>
+
+<div id="candidateModal" class="modal hidden"><div class="modalbox"><button id="candidateClose">×</button><h2 id="candidateModalTitle">Add Candidate</h2>
+<label>Name<input id="cName" placeholder="Candidate name"></label>
+<label>Technology<input id="cTech" placeholder="Technology / role"></label>
+<label>Phone / Email<input id="cContact" placeholder="Optional contact"></label>
+<label>Placement Status<select id="cPlacement"><option>Training</option><option>Interviewing</option><option>Placed</option><option>On Hold</option><option>Not Active</option></select></label>
+<label>Placement Company<input id="cCompany" placeholder="Optional company"></label>
+<button id="saveCandidate">Save Candidate</button></div></div>
+
+<div id="modal" class="modal hidden"><div class="modalbox"><button id="close">×</button><h2>Candidate Feedback</h2>
+<label>Candidate<select id="fbName"></select></label><label>Response<select id="fbResponse"><option>Good</option><option>Average</option><option>Poor</option></select></label>
+<label>Performance<select id="fbPerformance"><option>Good</option><option>Average</option><option>Needs Improvement</option></select></label>
+<label>Feedback<textarea id="fbText" placeholder="Example: Responds well and attends on time. Needs more technical practice."></textarea></label>
+<button id="saveFeedback">Save Feedback</button></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="app.js"></script>
+</body></html>
